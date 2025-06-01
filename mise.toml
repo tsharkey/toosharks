@@ -1,0 +1,12 @@
+[tools]
+flyctl = "latest"
+node = "22.16.0"
+
+[tasks]
+dev = "npm run dev"
+build = "npm run build"
+deploy = "fly deploy"
+build-deploy = [
+  "npm run build",
+  "fly deploy"
+]
