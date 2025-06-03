@@ -1,10 +1,43 @@
 ---
-import Layout from '../layouts/Layout.astro';
+const ctaCard = {
+  title: "Want to know more?",
+  description: "Explore my detailed background, skills, and projects.",
+  buttonText: "About Me",
+  href: "/about",
+};
+import Layout from "../layouts/Layout.astro";
+import Stack from "../components/Stack.astro";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const jobHistory = [
+  {
+    company: "Current Company",
+    position: "Senior Developer",
+    duration: "2023 - Present",
+    location: "Remote",
+    description:
+      "Leading development of scalable web applications using modern tech stack.",
+  },
+  {
+    company: "Previous Corp",
+    position: "Full Stack Developer",
+    duration: "2021 - 2023",
+    location: "New York, NY",
+    description:
+      "Built and maintained multiple client applications with React and Node.js.",
+  },
+  {
+    company: "Startup Inc",
+    position: "Junior Developer",
+    duration: "2020 - 2021",
+    location: "San Francisco, CA",
+    description:
+      "Started career building features for a fast-growing fintech startup.",
+  },
+];
 ---
 
-<Layout>
-  <h1 class="text-3xl font-bold underline">  Hello world!</h1>
+<Layout title="My Career Journey" fixed={true}>
+  <div class="h-full flex items-center justify-center px-4">
+    <Stack items={jobHistory} cta={ctaCard} />
+  </div>
 </Layout>

@@ -1,58 +1,33 @@
 ---
+// src/layouts/Layout.astro
 import "../styles/global.css";
+import IslandNav from "../components/IslandNav.astro";
+
+export interface Props {
+  title: string;
+  fixed?: boolean; // New prop to control scrollability
+}
+
+const { title, fixed = false } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html data-theme="nord" lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-    <title>TooSharks Site</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
   </head>
-  <body>
-    <div class="navbar bg-base-100 shadow-sm">
-      <a class="btn btn-ghost text-xl">daisyUI</a>
-    </div>
-    <slot />
-    <footer
-      class="footer sm:footer-horizontal bg-base-200 text-base-content p-10"
+  <body
+    class={`bg-base-300 ${fixed ? "h-screen overflow-hidden" : "min-h-screen"}`}
+  >
+    <IslandNav />
+    <main
+      class={fixed
+        ? "h-full w-full"
+        : "container mx-auto px-4 py-8 pt-20 max-w-4xl"}
     >
-      <nav>
-        <h6 class="footer-title">LATEST</h6>
-        <a class="link link-hover">Branding</a>
-        <a class="link link-hover">Design</a>
-        <a class="link link-hover">Marketing</a>
-        <a class="link link-hover">Advertisement</a>
-      </nav>
-      <nav>
-        <h6 class="footer-title">Company</h6>
-        <a class="link link-hover">About us</a>
-        <a class="link link-hover">Contact</a>
-        <a class="link link-hover">Jobs</a>
-        <a class="link link-hover">Press kit</a>
-      </nav>
-      <nav>
-        <h6 class="footer-title">Legal</h6>
-        <a class="link link-hover">Terms of use</a>
-        <a class="link link-hover">Privacy policy</a>
-        <a class="link link-hover">Cookie policy</a>
-      </nav>
-      <form>
-        <h6 class="footer-title">Newsletter</h6>
-        <fieldset class="w-80">
-          <label>Enter your email address</label>
-          <div class="join">
-            <input
-              type="text"
-              placeholder="username@site.com"
-              class="input input-bordered join-item"
-            />
-            <button class="btn btn-primary join-item">Subscribe</button>
-          </div>
-        </fieldset>
-      </form>
-    </footer>
+      <slot />
+    </main>
   </body>
 </html>

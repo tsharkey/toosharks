@@ -1,0 +1,158 @@
+---
+// Stack.astro
+import StackItem from "./StackItem.astro";
+import CTACard from "./CTACard.astro";
+
+export interface StackItemData {
+  company: string;
+  position: string;
+  duration: string;
+  location?: string;
+  description?: string;
+}
+
+export interface CTAData {
+  title?: string;
+  description?: string;
+  buttonText?: string;
+  href?: string;
+}
+
+export interface Props {
+  items: StackItemData[];
+  cta?: CTAData;
+}
+
+const { items, cta } = Astro.props;
+const totalItems = items.length + (cta ? 1 : 0);
+
+// Generate random offsets for a "messy" stack look
+const generateRandomOffset = (index: number, seed: number = 42) => {
+  // Simple pseudo-random function using index and seed for consistency
+  const random = (Math.sin(seed + index * 2.5) + 1) / 2;
+  const random2 = (Math.sin(seed + index * 3.7 + 10) + 1) / 2;
+  const random3 = (Math.sin(seed + index * 1.3 + 20) + 1) / 2;
+
+  return {
+    x: (random - 0.5) * 20, // Random x offset between -10px and 10px
+    y: index * 6 + (random2 - 0.5) * 8, // Base stacking + random y offset
+    rotation: (random3 - 0.5) * 12, // Random rotation between -6deg and 6deg
+  };
+};
+---
+
+<div class="relative flex justify-center items-center min-h-[300px]">
+  <!-- Stack Container -->
+  <div class="relative w-80 h-48" id="card-stack">
+    {
+      items.map((item, index) => {
+        const offset = generateRandomOffset(index);
+        return (
+          <div
+            class="absolute top-0 left-0 cursor-pointer transition-all duration-300 ease-out card-item"
+            style={`
+            transform: translateX(${offset.x}px) translateY(${offset.y}px) rotate(${offset.rotation}deg);
+            z-index: ${totalItems - index};
+          `}
+            data-index={index}
+            data-original-x={offset.x}
+            data-original-y={offset.y}
+            data-original-rotation={offset.rotation}
+          >
+            <StackItem {...item} />
+          </div>
+        );
+      })
+    }
+
+    {
+      cta &&
+        (() => {
+          const offset = generateRandomOffset(items.length);
+          return (
+            <div
+              class="absolute top-0 left-0 cursor-pointer transition-all duration-300 ease-out card-item"
+              style={`
+            transform: translateX(${offset.x}px) translateY(${offset.y}px) rotate(${offset.rotation}deg);
+            z-index: ${totalItems - items.length};
+          `}
+              data-index={items.length}
+              data-original-x={offset.x}
+              data-original-y={offset.y}
+              data-original-rotation={offset.rotation}
+            >
+              <CTACard {...cta} />
+            </div>
+          );
+        })()
+    }
+  </div>
+</div>
+
+<script>
+  class CardStack {
+    constructor() {
+      this.currentIndex = 0;
+      this.cards = document.querySelectorAll(".card-item");
+      this.totalCards = this.cards.length;
+
+      this.init();
+    }
+
+    init() {
+      // Add click listeners to cards
+      this.cards.forEach((card, index) => {
+        card.addEventListener("click", () => this.goToCard(index));
+      });
+
+      // Set initial state
+      this.updateStack();
+    }
+
+    goToCard(targetIndex) {
+      if (targetIndex === this.currentIndex) {
+        // If clicking the current card, go to next
+        this.currentIndex = (this.currentIndex + 1) % this.totalCards;
+      } else {
+        this.currentIndex = targetIndex;
+      }
+      this.updateStack();
+    }
+
+    updateStack() {
+      this.cards.forEach((card, index) => {
+        const relativeIndex =
+          (index - this.currentIndex + this.totalCards) % this.totalCards;
+        const zIndex = this.totalCards - relativeIndex;
+
+        if (relativeIndex === 0) {
+          // Current card: bring to front with clean positioning
+          card.style.transform =
+            "translateX(0px) translateY(0px) rotate(0deg) scale(1)";
+          card.style.opacity = "1";
+          card.style.zIndex = zIndex;
+        } else {
+          // Background cards: use their original messy positioning
+          const originalX = parseFloat(card.dataset.originalX || "0");
+          const originalY = parseFloat(card.dataset.originalY || "0");
+          const originalRotation = parseFloat(
+            card.dataset.originalRotation || "0",
+          );
+
+          // Add some additional offset for depth
+          const depthOffset = relativeIndex * 2;
+          const finalY = originalY + depthOffset;
+
+          card.style.transform = `translateX(${originalX}px) translateY(${finalY}px) rotate(${originalRotation}deg) scale(${1 - relativeIndex * 0.02})`;
+          card.style.opacity = `${Math.max(0.6, 1 - relativeIndex * 0.1)}`;
+          card.style.zIndex = zIndex;
+        }
+      });
+    }
+  }
+
+  // Initialize when DOM is loaded
+  document.addEventListener("DOMContentLoaded", () => {
+    new CardStack();
+  });
+</script>
