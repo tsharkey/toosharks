@@ -1,0 +1,36 @@
+---
+// StackItem.astro
+export interface Props {
+  company: string;
+  position: string;
+  duration: string;
+  location?: string;
+  description?: string;
+}
+
+const { company, position, duration, location, description } = Astro.props;
+---
+
+<div
+  class="bg-white rounded-lg shadow-lg p-6 w-80 h-48 border border-gray-200
+            transition-all duration-300 hover:shadow-xl select-none"
+>
+  <!-- Company Name -->
+  <h3 class="text-xl font-bold text-gray-800 mb-2">{company}</h3>
+
+  <!-- Position -->
+  <h4 class="text-lg font-semibold text-blue-600 mb-1">{position}</h4>
+
+  <!-- Duration and Location -->
+  <div class="text-sm text-gray-600 mb-3">
+    <p>{duration}</p>
+    {location && <p>{location}</p>}
+  </div>
+
+  <!-- Description -->
+  {
+    description && (
+      <p class="text-sm text-gray-700 leading-relaxed">{description}</p>
+    )
+  }
+</div>

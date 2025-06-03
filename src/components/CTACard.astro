@@ -1,0 +1,36 @@
+---
+// CTACard.astro
+export interface Props {
+  title?: string;
+  description?: string;
+  buttonText?: string;
+  href?: string;
+}
+
+const {
+  title = "Want to know more?",
+  description = "Explore my detailed background, skills, and projects.",
+  buttonText = "About Me",
+  href = "/about",
+} = Astro.props;
+---
+
+<div
+  class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg p-6 w-80 h-48 border border-blue-300
+            transition-all duration-300 hover:shadow-xl select-none text-white flex flex-col justify-center items-center"
+>
+  <!-- Title -->
+  <h3 class="text-2xl font-bold mb-3 text-center">{title}</h3>
+
+  <!-- Description -->
+  <p class="text-blue-100 text-center mb-4 leading-relaxed">{description}</p>
+
+  <!-- CTA Button -->
+  <a
+    href={href}
+    class="bg-white text-blue-600 font-semibold px-6 py-2 rounded-full hover:bg-blue-50
+           transition-colors duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+  >
+    {buttonText}
+  </a>
+</div>
