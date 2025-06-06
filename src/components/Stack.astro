@@ -1,5 +1,5 @@
 ---
-// Stack.astro
+// CleanStack.astro
 import StackItem from "./StackItem.astro";
 import CTACard from "./CTACard.astro";
 
@@ -24,135 +24,319 @@ export interface Props {
 }
 
 const { items, cta } = Astro.props;
-const totalItems = items.length + (cta ? 1 : 0);
+const allCards = [...items, ...(cta ? [cta] : [])];
 
-// Generate random offsets for a "messy" stack look
-const generateRandomOffset = (index: number, seed: number = 42) => {
-  // Simple pseudo-random function using index and seed for consistency
-  const random = (Math.sin(seed + index * 2.5) + 1) / 2;
-  const random2 = (Math.sin(seed + index * 3.7 + 10) + 1) / 2;
-  const random3 = (Math.sin(seed + index * 1.3 + 20) + 1) / 2;
+// Generate consistent random offsets for each card
+const generateOffset = (index: number) => {
+  // Use index as seed for consistent randomness
+  const random1 = Math.sin(index * 2.5) * 0.5 + 0.5;
+  const random2 = Math.sin(index * 3.7) * 0.5 + 0.5;
+  const random3 = Math.sin(index * 1.3) * 0.5 + 0.5;
 
   return {
-    x: (random - 0.5) * 20, // Random x offset between -10px and 10px
-    y: index * 6 + (random2 - 0.5) * 8, // Base stacking + random y offset
-    rotation: (random3 - 0.5) * 12, // Random rotation between -6deg and 6deg
+    x: (random1 - 0.5) * 20, // -10px to 10px
+    y: (random2 - 0.5) * 16, // -8px to 8px
+    rotation: (random3 - 0.5) * 12, // -6deg to 6deg
   };
 };
 ---
 
-<div class="relative flex justify-center items-center min-h-[300px]">
-  <!-- Stack Container -->
-  <div class="relative w-80 h-48" id="card-stack">
+<div class="card-stack-container">
+  <div class="card-stack" data-total-cards={allCards.length}>
     {
-      items.map((item, index) => {
-        const offset = generateRandomOffset(index);
+      allCards.map((card, index) => {
+        const offset = generateOffset(index);
+        const isLastCard = index === allCards.length - 1;
+
         return (
           <div
-            class="absolute top-0 left-0 cursor-pointer transition-all duration-300 ease-out card-item"
+            class="card-wrapper"
+            data-card-index={index}
             style={`
-            transform: translateX(${offset.x}px) translateY(${offset.y}px) rotate(${offset.rotation}deg);
-            z-index: ${totalItems - index};
+            --offset-x: ${offset.x}px;
+            --offset-y: ${offset.y}px;
+            --rotation: ${offset.rotation}deg;
+            --stack-order: ${allCards.length - index};
           `}
-            data-index={index}
-            data-original-x={offset.x}
-            data-original-y={offset.y}
-            data-original-rotation={offset.rotation}
           >
-            <StackItem {...item} />
+            {isLastCard && cta ? <CTACard {...cta} /> : <StackItem {...card} />}
           </div>
         );
       })
     }
-
-    {
-      cta &&
-        (() => {
-          const offset = generateRandomOffset(items.length);
-          return (
-            <div
-              class="absolute top-0 left-0 cursor-pointer transition-all duration-300 ease-out card-item"
-              style={`
-            transform: translateX(${offset.x}px) translateY(${offset.y}px) rotate(${offset.rotation}deg);
-            z-index: ${totalItems - items.length};
-          `}
-              data-index={items.length}
-              data-original-x={offset.x}
-              data-original-y={offset.y}
-              data-original-rotation={offset.rotation}
-            >
-              <CTACard {...cta} />
-            </div>
-          );
-        })()
-    }
   </div>
 </div>
 
+<style>
+  .card-stack-container {
+    position: relative;
+    width: 25rem; /* w-100 equivalent */
+    height: 14rem; /* h-56 equivalent */
+  }
+
+  .card-stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    touch-action: pan-y; /* Allow vertical scrolling but capture horizontal swipes */
+  }
+
+  .card-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease-out;
+    z-index: var(--stack-order);
+    user-select: none; /* Prevent text selection during swipes */
+  }
+
+  /* Default state: messy stack positioning */
+  .card-wrapper {
+    transform: translateX(var(--offset-x)) translateY(var(--offset-y))
+      rotate(var(--rotation));
+    opacity: 0.8;
+  }
+
+  /* Active card: clean positioning */
+  .card-wrapper.active {
+    transform: translateX(0) translateY(0) rotate(0);
+    opacity: 1;
+    z-index: 1000;
+  }
+
+  /* Background cards: slightly more faded and scaled */
+  .card-wrapper:not(.active) {
+    opacity: 0.7;
+    transform: translateX(var(--offset-x)) translateY(var(--offset-y))
+      rotate(var(--rotation)) scale(0.98);
+  }
+
+  /* Hover effect for non-active cards */
+  .card-wrapper:not(.active):hover {
+    opacity: 0.9;
+    transform: translateX(var(--offset-x)) translateY(var(--offset-y))
+      rotate(var(--rotation)) scale(1);
+  }
+
+  /* Disable hover effects on touch devices */
+  @media (hover: none) {
+    .card-wrapper:not(.active):hover {
+      opacity: 0.7;
+      transform: translateX(var(--offset-x)) translateY(var(--offset-y))
+        rotate(var(--rotation)) scale(0.98);
+    }
+  }
+</style>
+
 <script>
-  class CardStack {
-    constructor() {
+  class CleanCardStack {
+    constructor(container) {
+      this.container = container;
+      this.cards = container.querySelectorAll(".card-wrapper");
       this.currentIndex = 0;
-      this.cards = document.querySelectorAll(".card-item");
-      this.totalCards = this.cards.length;
+      this.totalCards = parseInt(container.dataset.totalCards, 10);
+
+      // Touch/swipe properties
+      this.startX = 0;
+      this.startY = 0;
+      this.currentX = 0;
+      this.currentY = 0;
+      this.isDragging = false;
+      this.minSwipeDistance = 50; // Minimum distance for a swipe
+      this.maxVerticalDistance = 100; // Maximum vertical movement to still count as horizontal swipe
 
       this.init();
     }
 
     init() {
-      // Add click listeners to cards
+      // Set initial active card
+      this.updateActiveCard();
+
+      // Add click listeners
       this.cards.forEach((card, index) => {
-        card.addEventListener("click", () => this.goToCard(index));
+        card.addEventListener("click", (e) => {
+          // Only handle click if it wasn't a swipe
+          if (!this.isDragging) {
+            this.handleCardClick(index);
+          }
+        });
       });
 
-      // Set initial state
-      this.updateStack();
+      // Add touch listeners
+      this.container.addEventListener(
+        "touchstart",
+        (e) => this.handleTouchStart(e),
+        { passive: true },
+      );
+      this.container.addEventListener(
+        "touchmove",
+        (e) => this.handleTouchMove(e),
+        { passive: true },
+      );
+      this.container.addEventListener(
+        "touchend",
+        (e) => this.handleTouchEnd(e),
+        { passive: true },
+      );
+
+      // Add mouse listeners for desktop testing (optional)
+      this.container.addEventListener("mousedown", (e) =>
+        this.handleMouseStart(e),
+      );
+      this.container.addEventListener("mousemove", (e) =>
+        this.handleMouseMove(e),
+      );
+      this.container.addEventListener("mouseup", (e) => this.handleMouseEnd(e));
+      this.container.addEventListener("mouseleave", (e) =>
+        this.handleMouseEnd(e),
+      );
     }
 
-    goToCard(targetIndex) {
-      if (targetIndex === this.currentIndex) {
-        // If clicking the current card, go to next
-        this.currentIndex = (this.currentIndex + 1) % this.totalCards;
-      } else {
-        this.currentIndex = targetIndex;
+    // Touch event handlers
+    handleTouchStart(e) {
+      const touch = e.touches[0];
+      this.startX = touch.clientX;
+      this.startY = touch.clientY;
+      this.isDragging = false;
+    }
+
+    handleTouchMove(e) {
+      if (!this.startX || !this.startY) return;
+
+      const touch = e.touches[0];
+      this.currentX = touch.clientX;
+      this.currentY = touch.clientY;
+
+      const diffX = Math.abs(this.currentX - this.startX);
+      const diffY = Math.abs(this.currentY - this.startY);
+
+      // If moving more horizontally than vertically, it might be a swipe
+      if (diffX > diffY && diffX > 10) {
+        this.isDragging = true;
       }
-      this.updateStack();
     }
 
-    updateStack() {
-      this.cards.forEach((card, index) => {
-        const relativeIndex =
-          (index - this.currentIndex + this.totalCards) % this.totalCards;
-        const zIndex = this.totalCards - relativeIndex;
+    handleTouchEnd(e) {
+      if (!this.startX || !this.startY) return;
 
-        if (relativeIndex === 0) {
-          // Current card: bring to front with clean positioning
-          card.style.transform =
-            "translateX(0px) translateY(0px) rotate(0deg) scale(1)";
-          card.style.opacity = "1";
-          card.style.zIndex = zIndex;
+      const diffX = this.currentX - this.startX;
+      const diffY = Math.abs(this.currentY - this.startY);
+
+      // Check if it's a valid horizontal swipe
+      if (
+        Math.abs(diffX) > this.minSwipeDistance &&
+        diffY < this.maxVerticalDistance
+      ) {
+        if (diffX > 0) {
+          // Swipe right - go to previous card
+          this.goToPrevious();
         } else {
-          // Background cards: use their original messy positioning
-          const originalX = parseFloat(card.dataset.originalX || "0");
-          const originalY = parseFloat(card.dataset.originalY || "0");
-          const originalRotation = parseFloat(
-            card.dataset.originalRotation || "0",
-          );
+          // Swipe left - go to next card
+          this.goToNext();
+        }
+      }
 
-          // Add some additional offset for depth
-          const depthOffset = relativeIndex * 2;
-          const finalY = originalY + depthOffset;
+      // Reset values
+      this.startX = 0;
+      this.startY = 0;
+      this.currentX = 0;
+      this.currentY = 0;
 
-          card.style.transform = `translateX(${originalX}px) translateY(${finalY}px) rotate(${originalRotation}deg) scale(${1 - relativeIndex * 0.02})`;
-          card.style.opacity = `${Math.max(0.6, 1 - relativeIndex * 0.1)}`;
-          card.style.zIndex = zIndex;
+      // Reset dragging flag after a short delay to prevent click events
+      setTimeout(() => {
+        this.isDragging = false;
+      }, 100);
+    }
+
+    // Mouse event handlers (for desktop testing)
+    handleMouseStart(e) {
+      this.startX = e.clientX;
+      this.startY = e.clientY;
+      this.isDragging = false;
+      e.preventDefault(); // Prevent text selection
+    }
+
+    handleMouseMove(e) {
+      if (!this.startX || !this.startY) return;
+
+      this.currentX = e.clientX;
+      this.currentY = e.clientY;
+
+      const diffX = Math.abs(this.currentX - this.startX);
+      const diffY = Math.abs(this.currentY - this.startY);
+
+      if (diffX > diffY && diffX > 10) {
+        this.isDragging = true;
+      }
+    }
+
+    handleMouseEnd(e) {
+      if (!this.startX || !this.startY) return;
+
+      const diffX = this.currentX - this.startX;
+      const diffY = Math.abs(this.currentY - this.startY);
+
+      if (
+        Math.abs(diffX) > this.minSwipeDistance &&
+        diffY < this.maxVerticalDistance
+      ) {
+        if (diffX > 0) {
+          this.goToPrevious();
+        } else {
+          this.goToNext();
+        }
+      }
+
+      this.startX = 0;
+      this.startY = 0;
+      this.currentX = 0;
+      this.currentY = 0;
+
+      setTimeout(() => {
+        this.isDragging = false;
+      }, 100);
+    }
+
+    handleCardClick(clickedIndex) {
+      if (clickedIndex === this.currentIndex) {
+        // Clicking active card cycles to next
+        this.goToNext();
+      } else {
+        // Clicking any other card makes it active
+        this.currentIndex = clickedIndex;
+        this.updateActiveCard();
+      }
+    }
+
+    goToNext() {
+      this.currentIndex = (this.currentIndex + 1) % this.totalCards;
+      this.updateActiveCard();
+    }
+
+    goToPrevious() {
+      this.currentIndex =
+        (this.currentIndex - 1 + this.totalCards) % this.totalCards;
+      this.updateActiveCard();
+    }
+
+    updateActiveCard() {
+      this.cards.forEach((card, index) => {
+        if (index === this.currentIndex) {
+          card.classList.add("active");
+        } else {
+          card.classList.remove("active");
         }
       });
     }
   }
 
-  // Initialize when DOM is loaded
+  // Initialize all card stacks when DOM loads
   document.addEventListener("DOMContentLoaded", () => {
-    new CardStack();
+    document.querySelectorAll(".card-stack").forEach((stack) => {
+      new CleanCardStack(stack);
+    });
   });
 </script>

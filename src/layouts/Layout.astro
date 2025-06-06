@@ -5,7 +5,7 @@ import IslandNav from "../components/IslandNav.astro";
 
 export interface Props {
   title: string;
-  fixed?: boolean; // New prop to control scrollability
+  fixed?: boolean;
 }
 
 const { title, fixed = false } = Astro.props;
@@ -19,15 +19,19 @@ const { title, fixed = false } = Astro.props;
     <title>{title}</title>
   </head>
   <body
-    class={`bg-base-300 ${fixed ? "h-screen overflow-hidden" : "min-h-screen"}`}
+    class={`${fixed ? "h-screen overflow-hidden" : "min-h-screen"} bg-base-200`}
   >
     <IslandNav />
-    <main
-      class={fixed
-        ? "h-full w-full"
-        : "container mx-auto px-4 py-8 pt-20 max-w-4xl"}
-    >
-      <slot />
-    </main>
+    {fixed ? (
+      <!-- Full viewport layout for fixed pages -->
+      <main class="fixed inset-0 flex items-center justify-center">
+        <slot />
+      </main>
+    ) : (
+      <!-- Normal layout with navbar spacing -->
+      <main class="pt-24">
+        <slot />
+      </main>
+    )}
   </body>
 </html>

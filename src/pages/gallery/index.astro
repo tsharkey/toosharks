@@ -1,1 +1,10 @@
-<h1>gallery</h1>
+---
+import PhotoGallery from "../../components/PhotoGallery.astro";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="toosharks" fixed={true}>
+  <div class="h-full flex items-center justify-center px-4">
+    <PhotoGallery />
+  </div>
+</Layout>
