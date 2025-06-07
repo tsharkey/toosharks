@@ -1,342 +1,219 @@
 ---
-// CleanStack.astro
-import StackItem from "./StackItem.astro";
+import BusinessCard from "./BusinessCard.astro";
 import CTACard from "./CTACard.astro";
+import type { BusinessCardData } from "./BusinessCard.astro";
+import type { CTACardData } from "./CTACard.astro";
 
-export interface StackItemData {
-  company: string;
-  position: string;
-  duration: string;
-  location?: string;
-  description?: string;
+// Union type for different card types
+type StackCardData =
+  | { type: "business"; data: BusinessCardData }
+  | { type: "cta"; data: CTACardData };
+
+// Sample data - mix of business cards and CTAs
+const sampleCards: StackCardData[] = [
+  {
+    type: "business",
+    data: {
+      name: "Your Name",
+      jobTitle: "Senior Full Stack Developer",
+      company: "TechCorp Inc",
+      logo: "/logos/techcorp.svg",
+      start: "2022",
+      end: "Present",
+      location: "San Francisco, CA",
+      description:
+        "Led development of microservices architecture using Go and TypeScript. Reduced deployment time by 60% through CI/CD improvements.",
+      layout: "logo-top-right",
+      rounded: true,
+    },
+  },
+  {
+    type: "cta",
+    data: {
+      title: "Let's Work Together",
+      description:
+        "Interested in collaborating on your next project? I'd love to hear about what you're building.",
+      buttonText: "Get In Touch",
+      buttonUrl: "mailto:hello@yourname.com",
+      rounded: true,
+    },
+  },
+  {
+    type: "business",
+    data: {
+      name: "Your Name",
+      jobTitle: "Software Engineer",
+      company: "StartupXYZ",
+      start: "2020",
+      end: "2022",
+      location: "Austin, TX",
+      description:
+        "Built customer-facing Ruby on Rails applications. Implemented real-time features using WebSockets and Redis.",
+      layout: "logo-top-right",
+      rounded: false,
+    },
+  },
+  {
+    type: "cta",
+    data: {
+      title: "View My Portfolio",
+      description:
+        "Check out some of the projects I've worked on and the technologies I love using.",
+      buttonText: "See Projects",
+      buttonUrl: "/portfolio",
+      rounded: false,
+    },
+  },
+  {
+    type: "business",
+    data: {
+      name: "Your Name",
+      jobTitle: "Junior Developer",
+      company: "Digital Agency Pro",
+      logo: "/logos/agency.svg",
+      start: "2018",
+      end: "2020",
+      location: "Remote",
+      description:
+        "Developed WordPress sites and custom JavaScript solutions. Collaborated with design teams on pixel-perfect implementations.",
+      layout: "logo-top-right",
+      rounded: true,
+    },
+  },
+];
+
+interface Props {
+  cards?: StackCardData[];
 }
 
-export interface CTAData {
-  title?: string;
-  description?: string;
-  buttonText?: string;
-  href?: string;
-}
+const { cards = sampleCards } = Astro.props;
 
-export interface Props {
-  items: StackItemData[];
-  cta?: CTAData;
-}
-
-const { items, cta } = Astro.props;
-const allCards = [...items, ...(cta ? [cta] : [])];
-
-// Generate consistent random offsets for each card
-const generateOffset = (index: number) => {
-  // Use index as seed for consistent randomness
-  const random1 = Math.sin(index * 2.5) * 0.5 + 0.5;
-  const random2 = Math.sin(index * 3.7) * 0.5 + 0.5;
-  const random3 = Math.sin(index * 1.3) * 0.5 + 0.5;
-
-  return {
-    x: (random1 - 0.5) * 20, // -10px to 10px
-    y: (random2 - 0.5) * 16, // -8px to 8px
-    rotation: (random3 - 0.5) * 12, // -6deg to 6deg
-  };
-};
+// Generate fixed positions for each card
+const cardPositions = cards.map((_, index) => ({
+  rotation: (Math.random() - 0.5) * 15,
+  translateX: (Math.random() - 0.5) * 16,
+  translateY: (Math.random() - 0.5) * 16,
+  scale: 1 - index * 0.01,
+}));
 ---
 
-<div class="card-stack-container">
-  <div class="card-stack" data-total-cards={allCards.length}>
-    {
-      allCards.map((card, index) => {
-        const offset = generateOffset(index);
-        const isLastCard = index === allCards.length - 1;
-
-        return (
-          <div
-            class="card-wrapper"
-            data-card-index={index}
-            style={`
-            --offset-x: ${offset.x}px;
-            --offset-y: ${offset.y}px;
-            --rotation: ${offset.rotation}deg;
-            --stack-order: ${allCards.length - index};
-          `}
-          >
-            {isLastCard && cta ? <CTACard {...cta} /> : <StackItem {...card} />}
-          </div>
-        );
-      })
-    }
-  </div>
+<div class="stack-container relative w-80 h-48 mx-auto" data-stack>
+  {
+    cards.map((card, index) => (
+      <div
+        class="stack-card absolute inset-0 transition-all duration-300 ease-out cursor-pointer"
+        style={`
+        transform: 
+          rotate(${cardPositions[index].rotation}deg) 
+          translate(${cardPositions[index].translateX}px, ${cardPositions[index].translateY}px)
+          scale(${cardPositions[index].scale});
+        z-index: ${cards.length - index};
+      `}
+        data-card-index={index}
+        data-rotation={cardPositions[index].rotation}
+        data-translate-x={cardPositions[index].translateX}
+        data-translate-y={cardPositions[index].translateY}
+        data-scale={cardPositions[index].scale}
+      >
+        {card.type === "business" ? (
+          <BusinessCard data={card.data} />
+        ) : (
+          <CTACard data={card.data} />
+        )}
+      </div>
+    ))
+  }
 </div>
 
-<style>
-  .card-stack-container {
-    position: relative;
-    width: 25rem; /* w-100 equivalent */
-    height: 14rem; /* h-56 equivalent */
-  }
-
-  .card-stack {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    touch-action: pan-y; /* Allow vertical scrolling but capture horizontal swipes */
-  }
-
-  .card-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    transition: all 0.3s ease-out;
-    z-index: var(--stack-order);
-    user-select: none; /* Prevent text selection during swipes */
-  }
-
-  /* Default state: messy stack positioning */
-  .card-wrapper {
-    transform: translateX(var(--offset-x)) translateY(var(--offset-y))
-      rotate(var(--rotation));
-    opacity: 0.8;
-  }
-
-  /* Active card: clean positioning */
-  .card-wrapper.active {
-    transform: translateX(0) translateY(0) rotate(0);
-    opacity: 1;
-    z-index: 1000;
-  }
-
-  /* Background cards: slightly more faded and scaled */
-  .card-wrapper:not(.active) {
-    opacity: 0.7;
-    transform: translateX(var(--offset-x)) translateY(var(--offset-y))
-      rotate(var(--rotation)) scale(0.98);
-  }
-
-  /* Hover effect for non-active cards */
-  .card-wrapper:not(.active):hover {
-    opacity: 0.9;
-    transform: translateX(var(--offset-x)) translateY(var(--offset-y))
-      rotate(var(--rotation)) scale(1);
-  }
-
-  /* Disable hover effects on touch devices */
-  @media (hover: none) {
-    .card-wrapper:not(.active):hover {
-      opacity: 0.7;
-      transform: translateX(var(--offset-x)) translateY(var(--offset-y))
-        rotate(var(--rotation)) scale(0.98);
-    }
-  }
-</style>
-
 <script>
-  class CleanCardStack {
-    constructor(container) {
+  class CardStack {
+    private container: HTMLElement;
+    private cards: HTMLElement[];
+    private currentIndex: number = 0;
+
+    constructor(container: HTMLElement) {
       this.container = container;
-      this.cards = container.querySelectorAll(".card-wrapper");
-      this.currentIndex = 0;
-      this.totalCards = parseInt(container.dataset.totalCards, 10);
-
-      // Touch/swipe properties
-      this.startX = 0;
-      this.startY = 0;
-      this.currentX = 0;
-      this.currentY = 0;
-      this.isDragging = false;
-      this.minSwipeDistance = 50; // Minimum distance for a swipe
-      this.maxVerticalDistance = 100; // Maximum vertical movement to still count as horizontal swipe
-
+      this.cards = Array.from(container.querySelectorAll(".stack-card"));
       this.init();
     }
 
-    init() {
-      // Set initial active card
-      this.updateActiveCard();
+    private init() {
+      // Add click handler to the container
+      this.container.addEventListener("click", () => this.nextCard());
 
-      // Add click listeners
-      this.cards.forEach((card, index) => {
-        card.addEventListener("click", (e) => {
-          // Only handle click if it wasn't a swipe
-          if (!this.isDragging) {
-            this.handleCardClick(index);
-          }
-        });
-      });
-
-      // Add touch listeners
-      this.container.addEventListener(
-        "touchstart",
-        (e) => this.handleTouchStart(e),
-        { passive: true },
-      );
-      this.container.addEventListener(
-        "touchmove",
-        (e) => this.handleTouchMove(e),
-        { passive: true },
-      );
-      this.container.addEventListener(
-        "touchend",
-        (e) => this.handleTouchEnd(e),
-        { passive: true },
-      );
-
-      // Add mouse listeners for desktop testing (optional)
-      this.container.addEventListener("mousedown", (e) =>
-        this.handleMouseStart(e),
-      );
-      this.container.addEventListener("mousemove", (e) =>
-        this.handleMouseMove(e),
-      );
-      this.container.addEventListener("mouseup", (e) => this.handleMouseEnd(e));
-      this.container.addEventListener("mouseleave", (e) =>
-        this.handleMouseEnd(e),
-      );
+      // Set initial positions
+      this.updateCardPositions();
     }
 
-    // Touch event handlers
-    handleTouchStart(e) {
-      const touch = e.touches[0];
-      this.startX = touch.clientX;
-      this.startY = touch.clientY;
-      this.isDragging = false;
-    }
+    private nextCard() {
+      const currentCard = this.cards[this.currentIndex];
 
-    handleTouchMove(e) {
-      if (!this.startX || !this.startY) return;
+      // Animate current card sliding out
+      currentCard.style.transition = "transform 400ms ease-in";
+      currentCard.style.transform = `
+        rotate(${15 + (Math.random() - 0.5) * 10}deg) 
+        translate(120px, -60px)
+        scale(0.95)
+      `;
 
-      const touch = e.touches[0];
-      this.currentX = touch.clientX;
-      this.currentY = touch.clientY;
-
-      const diffX = Math.abs(this.currentX - this.startX);
-      const diffY = Math.abs(this.currentY - this.startY);
-
-      // If moving more horizontally than vertically, it might be a swipe
-      if (diffX > diffY && diffX > 10) {
-        this.isDragging = true;
-      }
-    }
-
-    handleTouchEnd(e) {
-      if (!this.startX || !this.startY) return;
-
-      const diffX = this.currentX - this.startX;
-      const diffY = Math.abs(this.currentY - this.startY);
-
-      // Check if it's a valid horizontal swipe
-      if (
-        Math.abs(diffX) > this.minSwipeDistance &&
-        diffY < this.maxVerticalDistance
-      ) {
-        if (diffX > 0) {
-          // Swipe right - go to previous card
-          this.goToPrevious();
-        } else {
-          // Swipe left - go to next card
-          this.goToNext();
-        }
-      }
-
-      // Reset values
-      this.startX = 0;
-      this.startY = 0;
-      this.currentX = 0;
-      this.currentY = 0;
-
-      // Reset dragging flag after a short delay to prevent click events
+      // Update index and reposition other cards after a short delay
       setTimeout(() => {
-        this.isDragging = false;
-      }, 100);
+        this.currentIndex = (this.currentIndex + 1) % this.cards.length;
+        this.updateCardPositions();
+      }, 200);
     }
 
-    // Mouse event handlers (for desktop testing)
-    handleMouseStart(e) {
-      this.startX = e.clientX;
-      this.startY = e.clientY;
-      this.isDragging = false;
-      e.preventDefault(); // Prevent text selection
-    }
-
-    handleMouseMove(e) {
-      if (!this.startX || !this.startY) return;
-
-      this.currentX = e.clientX;
-      this.currentY = e.clientY;
-
-      const diffX = Math.abs(this.currentX - this.startX);
-      const diffY = Math.abs(this.currentY - this.startY);
-
-      if (diffX > diffY && diffX > 10) {
-        this.isDragging = true;
-      }
-    }
-
-    handleMouseEnd(e) {
-      if (!this.startX || !this.startY) return;
-
-      const diffX = this.currentX - this.startX;
-      const diffY = Math.abs(this.currentY - this.startY);
-
-      if (
-        Math.abs(diffX) > this.minSwipeDistance &&
-        diffY < this.maxVerticalDistance
-      ) {
-        if (diffX > 0) {
-          this.goToPrevious();
-        } else {
-          this.goToNext();
-        }
-      }
-
-      this.startX = 0;
-      this.startY = 0;
-      this.currentX = 0;
-      this.currentY = 0;
-
-      setTimeout(() => {
-        this.isDragging = false;
-      }, 100);
-    }
-
-    handleCardClick(clickedIndex) {
-      if (clickedIndex === this.currentIndex) {
-        // Clicking active card cycles to next
-        this.goToNext();
-      } else {
-        // Clicking any other card makes it active
-        this.currentIndex = clickedIndex;
-        this.updateActiveCard();
-      }
-    }
-
-    goToNext() {
-      this.currentIndex = (this.currentIndex + 1) % this.totalCards;
-      this.updateActiveCard();
-    }
-
-    goToPrevious() {
-      this.currentIndex =
-        (this.currentIndex - 1 + this.totalCards) % this.totalCards;
-      this.updateActiveCard();
-    }
-
-    updateActiveCard() {
+    private updateCardPositions() {
       this.cards.forEach((card, index) => {
-        if (index === this.currentIndex) {
-          card.classList.add("active");
+        const relativeIndex =
+          (index - this.currentIndex + this.cards.length) % this.cards.length;
+
+        // Get the fixed position data from the card element
+        const rotation = parseFloat(card.dataset.rotation || "0");
+        const translateX = parseFloat(card.dataset.translateX || "0");
+        const translateY = parseFloat(card.dataset.translateY || "0");
+        const scale = parseFloat(card.dataset.scale || "1");
+
+        // Reset transition for smooth repositioning
+        card.style.transition = "transform 300ms ease-out";
+
+        if (relativeIndex === 0) {
+          // Top card - use its fixed position but make it prominent
+          card.style.transform = `
+            rotate(${rotation}deg) 
+            translate(${translateX}px, ${translateY}px)
+            scale(1)
+          `;
+          card.style.zIndex = String(this.cards.length);
         } else {
-          card.classList.remove("active");
+          // Background cards - use fixed positions with depth scaling
+          const depthScale = scale * (1 - relativeIndex * 0.02);
+          card.style.transform = `
+            rotate(${rotation}deg) 
+            translate(${translateX}px, ${translateY}px)
+            scale(${depthScale})
+          `;
+          card.style.zIndex = String(this.cards.length - relativeIndex);
         }
       });
     }
   }
 
-  // Initialize all card stacks when DOM loads
+  // Initialize all stacks on the page
   document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".card-stack").forEach((stack) => {
-      new CleanCardStack(stack);
-    });
+    const stacks = document.querySelectorAll(
+      "[data-stack]",
+    ) as NodeListOf<HTMLElement>;
+    stacks.forEach((stack) => new CardStack(stack));
   });
 </script>
+
+<style>
+  .stack-card:hover {
+    transform-origin: center;
+  }
+
+  .stack-container {
+    perspective: 1000px;
+  }
+</style>

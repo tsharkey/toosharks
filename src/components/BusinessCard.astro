@@ -1,0 +1,80 @@
+---
+export interface BusinessCardData {
+  name: string;
+  jobTitle: string;
+  company: string;
+  logo?: string;
+  start: string;
+  end: string;
+  location: string;
+  description: string;
+  layout?: "logo-top-right"; // easily extensible
+  rounded?: boolean;
+}
+
+interface Props {
+  data: BusinessCardData;
+}
+
+const { data } = Astro.props;
+const {
+  name,
+  jobTitle,
+  company,
+  logo,
+  start,
+  end,
+  location,
+  description,
+  layout = "logo-top-right",
+  rounded = false,
+} = data;
+
+// Layout styles - easy to add new ones here
+const layoutClasses = {
+  "logo-top-right": "grid grid-cols-[1fr_auto] grid-rows-[auto_1fr_auto] gap-2",
+};
+
+const cardClasses = `
+  w-80 h-48 
+  bg-white 
+  border border-gray-200 
+  shadow-lg 
+  p-4 
+  ${rounded ? "rounded-lg" : "rounded-none"}
+  ${layoutClasses[layout]}
+`;
+---
+
+<div class={cardClasses}>
+  <!-- Logo (top-right) -->
+  {
+    logo && (
+      <div class="col-start-2 row-start-1 flex justify-end">
+        <img
+          src={logo}
+          alt={`${company} logo`}
+          class="w-12 h-12 object-contain"
+        />
+      </div>
+    )
+  }
+
+  <!-- Name and Title (top-left, spans full width if no logo) -->
+  <div class={`col-start-1 row-start-1 ${!logo ? "col-span-2" : ""}`}>
+    <h2 class="text-xl font-bold text-gray-900 leading-tight">{name}</h2>
+    <p class="text-sm font-medium text-gray-600 mt-1">{jobTitle}</p>
+  </div>
+
+  <!-- Company and Duration (middle section) -->
+  <div class="col-span-2 row-start-2 flex flex-col justify-center">
+    <p class="text-base font-semibold text-gray-800">{company}</p>
+    <p class="text-sm text-gray-600">{start} - {end}</p>
+    <p class="text-sm text-gray-600">{location}</p>
+  </div>
+
+  <!-- Description (bottom) -->
+  <div class="col-span-2 row-start-3">
+    <p class="text-xs text-gray-700 leading-relaxed">{description}</p>
+  </div>
+</div>
