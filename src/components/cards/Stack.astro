@@ -1,0 +1,219 @@
+---
+import BusinessCard from "./BusinessCard.astro";
+import CTACard from "./CTACard.astro";
+import type { BusinessCardData } from "./BusinessCard.astro";
+import type { CTACardData } from "./CTACard.astro";
+
+// Union type for different card types
+type StackCardData =
+  | { type: "business"; data: BusinessCardData }
+  | { type: "cta"; data: CTACardData };
+
+// Sample data - mix of business cards and CTAs
+const sampleCards: StackCardData[] = [
+  {
+    type: "business",
+    data: {
+      name: "Your Name",
+      jobTitle: "Senior Full Stack Developer",
+      company: "TechCorp Inc",
+      logo: "/logos/techcorp.svg",
+      start: "2022",
+      end: "Present",
+      location: "San Francisco, CA",
+      description:
+        "Led development of microservices architecture using Go and TypeScript. Reduced deployment time by 60% through CI/CD improvements.",
+      layout: "logo-top-right",
+      rounded: true,
+    },
+  },
+  {
+    type: "cta",
+    data: {
+      title: "Let's Work Together",
+      description:
+        "Interested in collaborating on your next project? I'd love to hear about what you're building.",
+      buttonText: "Get In Touch",
+      buttonUrl: "mailto:hello@yourname.com",
+      rounded: true,
+    },
+  },
+  {
+    type: "business",
+    data: {
+      name: "Your Name",
+      jobTitle: "Software Engineer",
+      company: "StartupXYZ",
+      start: "2020",
+      end: "2022",
+      location: "Austin, TX",
+      description:
+        "Built customer-facing Ruby on Rails applications. Implemented real-time features using WebSockets and Redis.",
+      layout: "logo-top-right",
+      rounded: false,
+    },
+  },
+  {
+    type: "cta",
+    data: {
+      title: "View My Portfolio",
+      description:
+        "Check out some of the projects I've worked on and the technologies I love using.",
+      buttonText: "See Projects",
+      buttonUrl: "/portfolio",
+      rounded: false,
+    },
+  },
+  {
+    type: "business",
+    data: {
+      name: "Your Name",
+      jobTitle: "Junior Developer",
+      company: "Digital Agency Pro",
+      logo: "/logos/agency.svg",
+      start: "2018",
+      end: "2020",
+      location: "Remote",
+      description:
+        "Developed WordPress sites and custom JavaScript solutions. Collaborated with design teams on pixel-perfect implementations.",
+      layout: "logo-top-right",
+      rounded: true,
+    },
+  },
+];
+
+interface Props {
+  cards?: StackCardData[];
+}
+
+const { cards = sampleCards } = Astro.props;
+
+// Generate fixed positions for each card
+const cardPositions = cards.map((_, index) => ({
+  rotation: (Math.random() - 0.5) * 15,
+  translateX: (Math.random() - 0.5) * 16,
+  translateY: (Math.random() - 0.5) * 16,
+  scale: 1 - index * 0.01,
+}));
+---
+
+<div class="stack-container relative w-80 h-48 mx-auto" data-stack>
+  {
+    cards.map((card, index) => (
+      <div
+        class="stack-card absolute inset-0 transition-all duration-300 ease-out cursor-pointer"
+        style={`
+        transform: 
+          rotate(${cardPositions[index].rotation}deg) 
+          translate(${cardPositions[index].translateX}px, ${cardPositions[index].translateY}px)
+          scale(${cardPositions[index].scale});
+        z-index: ${cards.length - index};
+      `}
+        data-card-index={index}
+        data-rotation={cardPositions[index].rotation}
+        data-translate-x={cardPositions[index].translateX}
+        data-translate-y={cardPositions[index].translateY}
+        data-scale={cardPositions[index].scale}
+      >
+        {card.type === "business" ? (
+          <BusinessCard data={card.data} />
+        ) : (
+          <CTACard data={card.data} />
+        )}
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  class CardStack {
+    private container: HTMLElement;
+    private cards: HTMLElement[];
+    private currentIndex: number = 0;
+
+    constructor(container: HTMLElement) {
+      this.container = container;
+      this.cards = Array.from(container.querySelectorAll(".stack-card"));
+      this.init();
+    }
+
+    private init() {
+      // Add click handler to the container
+      this.container.addEventListener("click", () => this.nextCard());
+
+      // Set initial positions
+      this.updateCardPositions();
+    }
+
+    private nextCard() {
+      const currentCard = this.cards[this.currentIndex];
+
+      // Animate current card sliding out
+      currentCard.style.transition = "transform 400ms ease-in";
+      currentCard.style.transform = `
+        rotate(${15 + (Math.random() - 0.5) * 10}deg) 
+        translate(120px, -60px)
+        scale(0.95)
+      `;
+
+      // Update index and reposition other cards after a short delay
+      setTimeout(() => {
+        this.currentIndex = (this.currentIndex + 1) % this.cards.length;
+        this.updateCardPositions();
+      }, 200);
+    }
+
+    private updateCardPositions() {
+      this.cards.forEach((card, index) => {
+        const relativeIndex =
+          (index - this.currentIndex + this.cards.length) % this.cards.length;
+
+        // Get the fixed position data from the card element
+        const rotation = parseFloat(card.dataset.rotation || "0");
+        const translateX = parseFloat(card.dataset.translateX || "0");
+        const translateY = parseFloat(card.dataset.translateY || "0");
+        const scale = parseFloat(card.dataset.scale || "1");
+
+        // Reset transition for smooth repositioning
+        card.style.transition = "transform 300ms ease-out";
+
+        if (relativeIndex === 0) {
+          // Top card - use its fixed position but make it prominent
+          card.style.transform = `
+            rotate(${rotation}deg) 
+            translate(${translateX}px, ${translateY}px)
+            scale(1)
+          `;
+          card.style.zIndex = String(this.cards.length);
+        } else {
+          // Background cards - use fixed positions with depth scaling
+          const depthScale = scale * (1 - relativeIndex * 0.02);
+          card.style.transform = `
+            rotate(${rotation}deg) 
+            translate(${translateX}px, ${translateY}px)
+            scale(${depthScale})
+          `;
+          card.style.zIndex = String(this.cards.length - relativeIndex);
+        }
+      });
+    }
+  }
+
+  // Initialize all stacks on the page
+  document.addEventListener("DOMContentLoaded", () => {
+    const stacks = document.querySelectorAll(
+      "[data-stack]",
+    ) as NodeListOf<HTMLElement>;
+    stacks.forEach((stack) => new CardStack(stack));
+  });
+</script>
+
+<style>
+  .stack-card:hover {
+    transform-origin: center;
+  }
+
+  .stack-container {
+    perspective: 1000px;
+  }
+</style>

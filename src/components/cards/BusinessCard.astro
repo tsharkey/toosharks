@@ -1,0 +1,71 @@
+---
+import BaseCard from "./BaseCard.astro";
+export interface BusinessCardData {
+  name?: string;
+  jobTitle: string;
+  company: string;
+  logo?: string;
+  duration: string;
+  location: string;
+  description: string;
+
+  // design props
+  layout?: "logo-top-right" | "logo-top-left" | "all-centered"; // easily extensible
+  rounded?: boolean;
+}
+
+interface Props {
+  data: BusinessCardData;
+}
+
+const { data } = Astro.props;
+const {
+  name = "Tom Sharkey",
+  jobTitle,
+  company = "unknown",
+  logo = company,
+  duration,
+  location,
+  description,
+  // todo add other layout types
+  layout = "logo-top-right",
+  rounded = true,
+} = data;
+---
+
+<BaseCard data={{ rounded: rounded }}>
+  <div class="grid">
+    {
+      layout === "logo-top-left" && (
+        <div class="grid-cols-2 grid-rows-4 ">
+          <div class="">
+            <h2 class="text-xl">{name}</h2>
+          </div>
+        </div>
+      )
+    }
+
+    {
+      layout === "logo-top-right" && (
+        <>
+          <div class={`col-start-1 row-start-1 ${!logo ? "col-span-2" : ""}`}>
+            <h2 class="text-xl font-bold text-gray-900 leading-tight">
+              {name}
+            </h2>
+            <p class="text-sm font-medium text-gray-600 mt-1">{jobTitle}</p>
+          </div>
+
+          <div class="col-span-2 row-start-2 flex flex-col justify-center">
+            <p class="text-base font-semibold text-gray-800">{company}</p>
+            <p class="text-sm text-gray-600">{duration}</p>
+            <p class="text-sm text-gray-600">{location}</p>
+          </div>
+
+          <div class="col-span-2 row-start-3">
+            <p class="text-xs text-gray-700 leading-relaxed">{description}</p>
+          </div>
+        </>
+      )
+    }
+  </div>
+</BaseCard>

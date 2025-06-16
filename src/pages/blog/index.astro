@@ -1,1 +1,76 @@
-<h1>blog</h1>
+---
+import { getCollection } from "astro:content";
+import ContentLayout from "../../layouts/ContentLayout.astro";
+
+const blogPosts = await getCollection("blog");
+const sortedPosts = blogPosts.sort(
+  (a, b) =>
+    new Date(b.data.pubdate).getTime() - new Date(a.data.pubdate).getTime(),
+);
+
+// Format date function
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(date));
+};
+---
+
+<ContentLayout title="My Blog">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Blog Header -->
+    <header class="text-center mb-12 pb-8 border-b border-base-300">
+      <h1 class="text-5xl font-bold text-base-content mb-3">My Blog</h1>
+      <p class="text-xl text-base-content/70">Latest thoughts and updates</p>
+    </header>
+
+    <!-- Posts Feed -->
+    <div class="space-y-6">
+      {
+        sortedPosts.map((post) => (
+          <article class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="card-body">
+              <h2 class="card-title text-2xl mb-4">
+                <a
+                  href={`/blog/${post.slug}`}
+                  class="link link-hover text-base-content hover:text-primary transition-colors duration-200"
+                >
+                  {post.data.title}
+                </a>
+              </h2>
+
+              <p class="text-base-content/80 text-lg leading-relaxed mb-6">
+                {post.data.description}
+              </p>
+
+              <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/60">
+                <div class="badge badge-outline badge-primary">
+                  {post.data.author}
+                </div>
+                <span class="hidden sm:inline">•</span>
+                <time class="badge badge-ghost" datetime={post.data.pubdate}>
+                  {formatDate(post.data.pubdate)}
+                </time>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- Empty State (if no posts) -->
+    {
+      sortedPosts.length === 0 && (
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">📝</div>
+          <h3 class="text-2xl font-semibold text-base-content mb-2">
+            No posts yet
+          </h3>
+          <p class="text-base-content/60">Check back soon for new content!</p>
+        </div>
+      )
+    }
+  </div>
+</ContentLayout>

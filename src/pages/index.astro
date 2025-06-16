@@ -1,43 +1,51 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Stack from "../components/cards/Stack.astro";
+
 const ctaCard = {
-  title: "Want to know more?",
-  description: "Explore my detailed background, skills, and projects.",
+  title: "Hey! I'm Tom",
+  description: "",
   buttonText: "About Me",
   href: "/about",
 };
-import Layout from "../layouts/Layout.astro";
-import Stack from "../components/Stack.astro";
 
 const jobHistory = [
   {
-    company: "Current Company",
-    position: "Senior Developer",
-    duration: "2023 - Present",
+    position: "Engineering Leader",
+    location: "Waterford, CT",
+    description: "Software, Warhammer 40k, Photography",
+    contact: "sharkey.thomasm@gmail.com",
+    layout: "new",
+    socials: true,
+  },
+  {
+    company: "Promoboxx",
+    position: "Backend Team Lead",
+    duration: "2018 - Present",
     location: "Remote",
-    description:
-      "Leading development of scalable web applications using modern tech stack.",
+    description: "Leader, Golang Champion, Product Partner",
+    logoSrc: "https://promoboxx.com/wp-content/uploads/2022/01/logo.svg",
   },
   {
-    company: "Previous Corp",
-    position: "Full Stack Developer",
-    duration: "2021 - 2023",
-    location: "New York, NY",
-    description:
-      "Built and maintained multiple client applications with React and Node.js.",
+    company: "Xfinity",
+    position: "Engineer II",
+    duration: "2016 - 2017",
+    location: "Denver, CO",
+    description: "Creating tools for teams and simulating network conditions",
+    logoSrc:
+      "https://1000logos.net/wp-content/uploads/2021/10/Xfinity-logo.jpg",
   },
   {
-    company: "Startup Inc",
-    position: "Junior Developer",
-    duration: "2020 - 2021",
-    location: "San Francisco, CA",
-    description:
-      "Started career building features for a fast-growing fintech startup.",
+    company: "Turbine Games",
+    position: "Associate Software Engineer",
+    duration: "2015 - 2017",
+    location: "Boston, MA",
+    description: "Developing a mobile game platform",
+    logoSrc: "https://static.tvtropes.org/pmwiki/pub/images/turbinelogo.png",
   },
 ];
 ---
 
-<Layout title="My Career Journey" fixed={true}>
-  <div class="h-full flex items-center justify-center px-4">
-    <Stack items={jobHistory} cta={ctaCard} />
-  </div>
-</Layout>
+<BaseLayout title="toosharks" fixed={true}>
+  <Stack items={jobHistory} cta={ctaCard} />
+</BaseLayout>

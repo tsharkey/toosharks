@@ -1,0 +1,125 @@
+---
+// src/components/PhotoGallery.astro
+// Sample Cloudinary URLs - replace with your actual images
+const images = [
+  {
+    id: 1,
+    url: "https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_600/sample.jpg",
+    thumb:
+      "https://res.cloudinary.com/demo/image/upload/c_fill,w_200,h_150/sample.jpg",
+    alt: "Sample landscape photo",
+  },
+  {
+    id: 2,
+    url: "https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_1000/woman.jpg",
+    thumb:
+      "https://res.cloudinary.com/demo/image/upload/c_fill,w_200,h_250/woman.jpg",
+    alt: "Portrait photo",
+  },
+  {
+    id: 3,
+    url: "https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_600/nature.jpg",
+    thumb:
+      "https://res.cloudinary.com/demo/image/upload/c_fill,w_200,h_150/nature.jpg",
+    alt: "Nature scene",
+  },
+  {
+    id: 4,
+    url: "https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_800/architecture.jpg",
+    thumb:
+      "https://res.cloudinary.com/demo/image/upload/c_fill,w_200,h_200/architecture.jpg",
+    alt: "Architecture photo",
+  },
+  {
+    id: 5,
+    url: "https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_700/street.jpg",
+    thumb:
+      "https://res.cloudinary.com/demo/image/upload/c_fill,w_200,h_175/street.jpg",
+    alt: "Street photography",
+  },
+];
+---
+
+<div class="min-h-screen bg-base-200 py-8">
+  <!-- Main Image Display -->
+  <div class="flex justify-center items-center px-4 mb-8">
+    <div class="max-w-4xl w-full">
+      <div class="bg-base-100 p-4 rounded-lg shadow-lg">
+        <img
+          id="main-image"
+          src={images[0].url}
+          alt={images[0].alt}
+          class="w-full h-auto max-h-[70vh] object-contain rounded transition-opacity duration-300"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Thumbnail Navigation -->
+  <div class="px-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="overflow-x-auto">
+        <div class="flex space-x-4 pb-4">
+          {
+            images.map((image, index) => (
+              <button
+                class={`thumbnail-btn flex-shrink-0 border-2 rounded-lg overflow-hidden transition-all duration-200 hover:border-primary ${
+                  index === 0 ? "border-primary" : "border-base-300"
+                }`}
+                data-index={index}
+                data-url={image.url}
+                data-alt={image.alt}
+              >
+                <img
+                  src={image.thumb}
+                  alt={image.alt}
+                  class="w-auto h-20 object-cover"
+                />
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Gallery functionality
+  const mainImage = document.getElementById("main-image") as HTMLImageElement;
+  const thumbnailBtns = document.querySelectorAll(".thumbnail-btn");
+
+  thumbnailBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const button = btn as HTMLButtonElement;
+      const newUrl = button.dataset.url;
+      const newAlt = button.dataset.alt;
+      const index = button.dataset.index;
+
+      if (newUrl && newAlt && mainImage) {
+        // Fade out
+        mainImage.style.opacity = "0.5";
+
+        // Change image after short delay
+        setTimeout(() => {
+          mainImage.src = newUrl;
+          mainImage.alt = newAlt;
+
+          // Fade in
+          mainImage.style.opacity = "1";
+        }, 150);
+
+        // Update thumbnail borders
+        thumbnailBtns.forEach((thumb, i) => {
+          if (i.toString() === index) {
+            thumb.classList.remove("border-base-300");
+            thumb.classList.add("border-primary");
+          } else {
+            thumb.classList.remove("border-primary");
+            thumb.classList.add("border-base-300");
+          }
+        });
+      }
+    });
+  });
+</script>
