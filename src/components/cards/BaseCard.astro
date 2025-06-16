@@ -1,0 +1,18 @@
+---
+export interface BaseCardData {
+  rounded?: boolean;
+}
+
+interface Props {
+  data?: BaseCardData;
+}
+
+const { data = { rounded: false } as BaseCardData } = Astro.props;
+const { rounded = false } = data;
+---
+
+<div
+  class={`w-80 h-48 bg-white border border-gray-200 shadow-lg p-4 relative ${rounded ? "rounded-lg" : "rounded-non"}`}
+>
+  <slot />
+</div>

@@ -1,6 +1,6 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Stack from "../components/Stack.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Stack from "../components/cards/Stack.astro";
 
 const ctaCard = {
   title: "Hey! I'm Tom",
@@ -15,6 +15,7 @@ const jobHistory = [
     location: "Waterford, CT",
     description: "Software, Warhammer 40k, Photography",
     contact: "sharkey.thomasm@gmail.com",
+    layout: "new",
     socials: true,
   },
   {
@@ -45,6 +46,6 @@ const jobHistory = [
 ];
 ---
 
-<Layout title="toosharks" fixed={true}>
+<BaseLayout title="toosharks" fixed={true}>
   <Stack items={jobHistory} cta={ctaCard} />
-</Layout>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+import BaseCard from "./BaseCard.astro";
+export interface CTACardData {
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonUrl: string;
+}
+
+interface Props {
+  data: CTACardData;
+}
+
+const { data } = Astro.props;
+const { title, description, buttonText, buttonUrl } = data;
+---
+
+<BaseCard data={{ rounded: true }}>
+  <h2>{title}</h2>
+  <p>{description}</p>
+  <button class="bg-blue">
+    <a href={buttonUrl}>{buttonText}</a>
+  </button>
+</BaseCard>
