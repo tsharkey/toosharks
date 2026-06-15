@@ -22,10 +22,10 @@ const cardPositions = cards.map((_, index) => ({
   {
     cards.map((card, index) => (
       <div
-        class="stack-card absolute inset-0 transition-all duration-300 ease-out cursor-pointer"
+        class="stack-card absolute inset-0 transition-all duration-300 ease-out cursor-grab"
         style={`
-        transform: 
-          rotate(${cardPositions[index].rotation}deg) 
+        transform:
+          rotate(${cardPositions[index].rotation}deg)
           translate(${cardPositions[index].translateX}px, ${cardPositions[index].translateY}px)
           scale(${cardPositions[index].scale});
         z-index: ${cards.length - index};
@@ -47,10 +47,27 @@ const cardPositions = cards.map((_, index) => ({
 </div>
 
 <script>
+  type Direction = "left" | "right";
+
   class CardStack {
     private container: HTMLElement;
     private cards: HTMLElement[];
     private currentIndex: number = 0;
+
+    // Drag state
+    private isDragging: boolean = false;
+    private startX: number = 0;
+    private startY: number = 0;
+    private deltaX: number = 0;
+    private deltaY: number = 0;
+    private startTime: number = 0;
+    private activePointerId: number | null = null;
+    private activeCard: HTMLElement | null = null;
+
+    // Thresholds
+    private readonly DISTANCE_THRESHOLD = 100; // px
+    private readonly VELOCITY_THRESHOLD = 0.5; // px/ms
+    private readonly CLICK_TOLERANCE = 5; // px
 
     constructor(container: HTMLElement) {
       this.container = container;
@@ -59,29 +76,177 @@ const cardPositions = cards.map((_, index) => ({
     }
 
     private init() {
-      // Add click handler to the container
-      this.container.addEventListener("click", () => this.nextCard());
+      this.cards.forEach((card) => {
+        card.addEventListener("pointerdown", (e) => this.onPointerDown(e, card));
+        card.addEventListener("pointermove", (e) => this.onPointerMove(e));
+        card.addEventListener("pointerup", (e) => this.onPointerUp(e));
+        card.addEventListener("pointercancel", (e) => this.onPointerUp(e));
 
-      // Set initial positions
+        // Prevent native browser drag on images/icons inside the card, which
+        // otherwise hijacks the pointer stream and breaks swipe.
+        card.addEventListener("dragstart", (e) => e.preventDefault());
+        card.querySelectorAll("img").forEach((img) => {
+          img.setAttribute("draggable", "false");
+        });
+      });
+
       this.updateCardPositions();
     }
 
-    private nextCard() {
-      const currentCard = this.cards[this.currentIndex];
+    private getTopCard(): HTMLElement {
+      return this.cards[this.currentIndex];
+    }
 
-      // Animate current card sliding out
-      currentCard.style.transition = "transform 400ms ease-in";
-      currentCard.style.transform = `
-        rotate(${15 + (Math.random() - 0.5) * 10}deg) 
-        translate(120px, -60px)
-        scale(0.95)
+    private onPointerDown(e: PointerEvent, card: HTMLElement) {
+      // Only the top card responds to drag
+      if (card !== this.getTopCard()) return;
+
+      // Prevent default so the browser doesn't start a native drag on child
+      // elements like <img> or SVG icons.
+      e.preventDefault();
+
+      this.isDragging = true;
+      this.activePointerId = e.pointerId;
+      this.activeCard = card;
+      this.startX = e.clientX;
+      this.startY = e.clientY;
+      this.deltaX = 0;
+      this.deltaY = 0;
+      this.startTime = performance.now();
+
+      card.setPointerCapture(e.pointerId);
+      card.style.transition = "none";
+      card.style.cursor = "grabbing";
+    }
+
+    private onPointerMove(e: PointerEvent) {
+      if (!this.isDragging || e.pointerId !== this.activePointerId) return;
+      if (!this.activeCard) return;
+
+      this.deltaX = e.clientX - this.startX;
+      this.deltaY = e.clientY - this.startY;
+
+      const baseRotation = parseFloat(this.activeCard.dataset.rotation || "0");
+      const baseX = parseFloat(this.activeCard.dataset.translateX || "0");
+      const baseY = parseFloat(this.activeCard.dataset.translateY || "0");
+
+      // Card follows finger with a slight tilt based on horizontal drag
+      const dragRotation = this.deltaX * 0.06;
+      const opacity = Math.max(
+        0.4,
+        1 - Math.abs(this.deltaX) / (this.DISTANCE_THRESHOLD * 3),
+      );
+
+      this.activeCard.style.transform = `
+        rotate(${baseRotation + dragRotation}deg)
+        translate(${baseX + this.deltaX}px, ${baseY + this.deltaY}px)
+        scale(1)
       `;
+      this.activeCard.style.opacity = String(opacity);
 
-      // Update index and reposition other cards after a short delay
+      // Subtle peek effect on the next card underneath
+      const nextRelativeIndex = 1;
+      const nextIndex =
+        (this.currentIndex + nextRelativeIndex) % this.cards.length;
+      const nextCard = this.cards[nextIndex];
+      if (nextCard) {
+        const progress = Math.min(1, Math.abs(this.deltaX) / this.DISTANCE_THRESHOLD);
+        const nextBaseRot = parseFloat(nextCard.dataset.rotation || "0");
+        const nextBaseX = parseFloat(nextCard.dataset.translateX || "0");
+        const nextBaseY = parseFloat(nextCard.dataset.translateY || "0");
+        const nextBaseScale = parseFloat(nextCard.dataset.scale || "1");
+        const peekScale = nextBaseScale * (0.98 + 0.02 * progress);
+        nextCard.style.transition = "none";
+        nextCard.style.transform = `
+          rotate(${nextBaseRot}deg)
+          translate(${nextBaseX}px, ${nextBaseY}px)
+          scale(${peekScale})
+        `;
+      }
+    }
+
+    private onPointerUp(e: PointerEvent) {
+      if (!this.isDragging || e.pointerId !== this.activePointerId) return;
+      if (!this.activeCard) return;
+
+      const card = this.activeCard;
+      const duration = performance.now() - this.startTime;
+      const velocity = Math.abs(this.deltaX) / Math.max(duration, 1);
+      const absDelta = Math.abs(this.deltaX);
+
+      try {
+        card.releasePointerCapture(e.pointerId);
+      } catch (_) {
+        // ignore
+      }
+
+      card.style.cursor = "grab";
+
+      const shouldDismiss =
+        absDelta > this.DISTANCE_THRESHOLD ||
+        velocity > this.VELOCITY_THRESHOLD;
+
+      if (shouldDismiss) {
+        const direction: Direction = this.deltaX > 0 ? "right" : "left";
+        this.dismissCard(card, direction);
+      } else if (absDelta < this.CLICK_TOLERANCE && Math.abs(this.deltaY) < this.CLICK_TOLERANCE) {
+        // Treat as a click — advance forward
+        this.resetCard(card);
+        this.advance("right");
+      } else {
+        // Snap back
+        this.resetCard(card);
+      }
+
+      this.isDragging = false;
+      this.activePointerId = null;
+      this.activeCard = null;
+      this.deltaX = 0;
+      this.deltaY = 0;
+    }
+
+    private resetCard(card: HTMLElement) {
+      const rotation = parseFloat(card.dataset.rotation || "0");
+      const translateX = parseFloat(card.dataset.translateX || "0");
+      const translateY = parseFloat(card.dataset.translateY || "0");
+
+      card.style.transition = "transform 300ms ease-out, opacity 300ms ease-out";
+      card.style.transform = `
+        rotate(${rotation}deg)
+        translate(${translateX}px, ${translateY}px)
+        scale(1)
+      `;
+      card.style.opacity = "1";
+      this.updateCardPositions();
+    }
+
+    private dismissCard(card: HTMLElement, direction: Direction) {
+      const flyX = direction === "right" ? 600 : -600;
+      const flyRotation = direction === "right" ? 25 : -25;
+
+      card.style.transition = "transform 400ms ease-in, opacity 400ms ease-in";
+      card.style.transform = `
+        rotate(${flyRotation}deg)
+        translate(${flyX}px, -40px)
+        scale(0.9)
+      `;
+      card.style.opacity = "0";
+
       setTimeout(() => {
+        this.advance(direction);
+        // Restore opacity for when this card cycles back into the deck
+        card.style.opacity = "1";
+      }, 250);
+    }
+
+    private advance(direction: Direction) {
+      if (direction === "right") {
         this.currentIndex = (this.currentIndex + 1) % this.cards.length;
-        this.updateCardPositions();
-      }, 200);
+      } else {
+        this.currentIndex =
+          (this.currentIndex - 1 + this.cards.length) % this.cards.length;
+      }
+      this.updateCardPositions();
     }
 
     private updateCardPositions() {
@@ -89,38 +254,36 @@ const cardPositions = cards.map((_, index) => ({
         const relativeIndex =
           (index - this.currentIndex + this.cards.length) % this.cards.length;
 
-        // Get the fixed position data from the card element
         const rotation = parseFloat(card.dataset.rotation || "0");
         const translateX = parseFloat(card.dataset.translateX || "0");
         const translateY = parseFloat(card.dataset.translateY || "0");
         const scale = parseFloat(card.dataset.scale || "1");
 
-        // Reset transition for smooth repositioning
-        card.style.transition = "transform 300ms ease-out";
+        card.style.transition = "transform 300ms ease-out, opacity 300ms ease-out";
+        card.style.opacity = "1";
 
         if (relativeIndex === 0) {
-          // Top card - use its fixed position but make it prominent
           card.style.transform = `
-            rotate(${rotation}deg) 
+            rotate(${rotation}deg)
             translate(${translateX}px, ${translateY}px)
             scale(1)
           `;
           card.style.zIndex = String(this.cards.length);
+          card.style.cursor = "grab";
         } else {
-          // Background cards - use fixed positions with depth scaling
           const depthScale = scale * (1 - relativeIndex * 0.02);
           card.style.transform = `
-            rotate(${rotation}deg) 
+            rotate(${rotation}deg)
             translate(${translateX}px, ${translateY}px)
             scale(${depthScale})
           `;
           card.style.zIndex = String(this.cards.length - relativeIndex);
+          card.style.cursor = "default";
         }
       });
     }
   }
 
-  // Initialize all stacks on the page
   document.addEventListener("DOMContentLoaded", () => {
     const stacks = document.querySelectorAll(
       "[data-stack]",
@@ -130,11 +293,27 @@ const cardPositions = cards.map((_, index) => ({
 </script>
 
 <style>
-  .stack-card:hover {
-    transform-origin: center;
-  }
-
   .stack-container {
     perspective: 1000px;
+  }
+
+  .stack-card {
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Prevent native drag-and-drop on images/SVGs inside cards from hijacking
+     the swipe gesture. Links remain interactive. */
+  .stack-card img,
+  .stack-card svg {
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .stack-card a {
+    -webkit-user-drag: none;
   }
 </style>
