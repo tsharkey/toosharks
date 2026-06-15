@@ -1,51 +1,72 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Stack from "../components/cards/Stack.astro";
+import type { StackCardData } from "../components/cards/types";
 
-const ctaCard = {
-  title: "Hey! I'm Tom",
-  description: "",
-  buttonText: "About Me",
-  href: "/about",
-};
-
-const jobHistory = [
+const cards: StackCardData[] = [
   {
-    position: "Engineering Leader",
-    location: "Waterford, CT",
-    description: "Software, Warhammer 40k, Photography",
-    contact: "sharkey.thomasm@gmail.com",
-    layout: "new",
-    socials: true,
+    type: "business",
+    data: {
+      name: "Tom Sharkey",
+      jobTitle: "Engineering Leader",
+      location: "Waterford, CT",
+      description: "Software, Warhammer 40k, Photography",
+      contact: "sharkey.thomasm@gmail.com",
+      layout: "leading",
+    },
   },
   {
-    company: "Promoboxx",
-    position: "Backend Team Lead",
-    duration: "2018 - Present",
-    location: "Remote",
-    description: "Leader, Golang Champion, Product Partner",
-    logoSrc: "https://promoboxx.com/wp-content/uploads/2022/01/logo.svg",
+    type: "business",
+    data: {
+      name: "Tom Sharkey",
+      jobTitle: "Backend Team Lead",
+      company: "Promoboxx",
+      location: "Boston, MA",
+      duration: "2018-Present",
+      contact: "tom@promoboxx.com",
+      description: "Distributed Systems, Devops, Security, and Cloud",
+      logo: "https://media.licdn.com/dms/image/v2/C4D0BAQE4xzSpUIg9Ag/company-logo_200_200/company-logo_200_200/0/1630561628706/promoboxx_logo?e=2147483647&v=beta&t=G3UuJFJsTHh0m6lsx2TNn4teCv7yM689gHfeREs0L4g",
+      layout: "logo-top-right",
+    },
   },
   {
-    company: "Xfinity",
-    position: "Engineer II",
-    duration: "2016 - 2017",
-    location: "Denver, CO",
-    description: "Creating tools for teams and simulating network conditions",
-    logoSrc:
-      "https://1000logos.net/wp-content/uploads/2021/10/Xfinity-logo.jpg",
+    type: "business",
+    data: {
+      name: "Tom Sharkey",
+      jobTitle: "Engineer II",
+      company: "Comcast Viper",
+      duration: "2017-2018",
+      location: "Denver, CO",
+      description: "Creating tools to test and improve network infrastructure",
+      logo: "https://www.ilcma.org/wp-content/uploads/2015/06/Comcast-Logo-2017.png",
+      layout: "logo-top-right",
+    },
   },
   {
-    company: "Turbine Games",
-    position: "Associate Software Engineer",
-    duration: "2015 - 2017",
-    location: "Boston, MA",
-    description: "Developing a mobile game platform",
-    logoSrc: "https://static.tvtropes.org/pmwiki/pub/images/turbinelogo.png",
+    type: "business",
+    data: {
+      name: "Tom Sharkey",
+      jobTitle: "Associate Software Engineer",
+      location: "Needham, MA",
+      duration: "2015-2017",
+      company: "WB Games Boston",
+      description: "Developing a mobile game platform with Golang",
+      logo: "https://upload.wikimedia.org/wikipedia/commons/b/b2/WB_Games_Boston_logo.jpg",
+      layout: "logo-top-right",
+    },
+  },
+  {
+    type: "cta",
+    data: {
+      title: "Get in Touch",
+      description: "Checkout some of my projects and get in touch!",
+      buttonText: "Contact Me",
+      buttonUrl: "/about",
+    },
   },
 ];
 ---
 
 <BaseLayout title="toosharks" fixed={true}>
-  <Stack items={jobHistory} cta={ctaCard} />
+  <Stack cards={cards} />
 </BaseLayout>

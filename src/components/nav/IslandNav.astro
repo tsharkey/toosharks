@@ -1,5 +1,8 @@
 ---
-// Navbar.astro - Smart Auto-Hide Implementation
+const blogEnabled = true;
+const notesEnabled = false;
+const galleryEnabled = false;
+const aboutEnabled = true;
 ---
 
 <nav id="navbar">
@@ -15,8 +18,7 @@
                   active:scale-100 active:translate-y-0
                   px-4 py-2"
     >
-      <div class="flex justify-between items-center w-full">
-        <!-- Home -->
+      <div class="flex justify-evenly items-center w-full">
         <a
           href="/"
           class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
@@ -42,118 +44,133 @@
           >
         </a>
 
-        <!-- Blog -->
-        <a
-          href="/blog"
-          class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-newspaper-icon lucide-newspaper"
-            ><path d="M15 18h-5"></path><path d="M18 14h-8"></path><path
-              d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"
-            ></path><rect width="8" height="4" x="10" y="6" rx="1"></rect></svg
-          >
-          <span
-            class="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-200"
-            >Blog</span
-          >
-        </a>
+        {
+          blogEnabled && (
+            <a
+              href="/blog"
+              class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-newspaper-icon lucide-newspaper"
+              >
+                <>
+                  <path d="M15 18h-5" />
+                  <path d="M18 14h-8" />
+                  <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2" />
+                  <rect width="8" height="4" x="10" y="6" rx="1" />
+                </>
+              </svg>
+              <span class="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-200">
+                Blog
+              </span>
+            </a>
+          )
+        }
 
-        <!-- Notes -->
-        <a
-          href="/notes"
-          class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-notebook-pen-icon lucide-notebook-pen"
-            ><path
-              d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"
-            ></path><path d="M2 6h4"></path><path d="M2 10h4"></path><path
-              d="M2 14h4"></path><path d="M2 18h4"></path><path
-              d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"
-            ></path></svg
-          >
-          <span
-            class="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-200"
-            >Notes</span
-          >
-        </a>
+        {
+          notesEnabled && (
+            <a
+              href="/notes"
+              class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-notebook-pen-icon lucide-notebook-pen"
+              >
+                <>
+                  <path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" />
+                  <path d="M2 6h4" />
+                  <path d="M2 10h4" />
+                  <path d="M2 14h4" />
+                  <path d="M2 18h4" />
+                  <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
+                </>
+              </svg>
+              <span class="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-200">
+                Notes
+              </span>
+            </a>
+          )
+        }
 
         <!-- Gallery -->
-        <a
-          href="/gallery"
-          class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-images-icon lucide-images"
-            ><path d="M18 22H4a2 2 0 0 1-2-2V6"></path><path
-              d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"
-            ></path><circle cx="12" cy="8" r="2"></circle><rect
-              width="16"
-              height="16"
-              x="6"
-              y="2"
-              rx="2"></rect></svg
-          >
-          <span
-            class="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-200"
-            >Gallery</span
-          >
-        </a>
-
-        <!-- Me -->
-        <a
-          href="/about"
-          class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-user-icon lucide-user"
-            ><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle
-              cx="12"
-              cy="7"
-              r="4"></circle></svg
-          >
-          <span
-            class="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-200"
-            >Me</span
-          >
-        </a>
+        {
+          galleryEnabled && (
+            <a
+              href="/gallery"
+              class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-images-icon lucide-images"
+              >
+                <>
+                  <path d="M18 22H4a2 2 0 0 1-2-2V6" />
+                  <path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18" />
+                  <circle cx="12" cy="8" r="2" />
+                  <rect width="16" height="16" x="6" y="2" rx="2" />
+                </>
+              </svg>
+              <span class="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-200">
+                Gallery
+              </span>
+            </a>
+          )
+        }
+        {
+          aboutEnabled && (
+            <a
+              href="/about"
+              class="flex flex-col items-center justify-center w-12 h-12 rounded-lg text-base-100 hover:bg-opacity-20 transition-all duration-200 ease-out hover:scale-110 active:scale-95 group"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-user-icon lucide-user"
+              >
+                <>
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </>
+              </svg>
+              <span class="text-xs font-medium opacity-80 group-hover:opacity-100 transition-opacity duration-200">
+                Me
+              </span>
+            </a>
+          )
+        }
       </div>
     </div>
   </div>
@@ -166,7 +183,8 @@
   const navbar = document.getElementById("navbar-container");
   const threshold = 100; // Start hiding after 100px of scroll
 
-  window.addEventListener(
+  if (navbar) {
+    window.addEventListener(
     "scroll",
     () => {
       const scrollTop =
@@ -199,4 +217,5 @@
     },
     { passive: true },
   );
+  }
 </script>

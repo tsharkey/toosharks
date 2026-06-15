@@ -1,11 +1,6 @@
 ---
 import BaseCard from "./BaseCard.astro";
-export interface CTACardData {
-  title: string;
-  description: string;
-  buttonText: string;
-  buttonUrl: string;
-}
+import type { CTACardData } from "./types";
 
 interface Props {
   data: CTACardData;

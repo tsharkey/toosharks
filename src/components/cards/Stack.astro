@@ -1,92 +1,13 @@
 ---
 import BusinessCard from "./BusinessCard.astro";
 import CTACard from "./CTACard.astro";
-import type { BusinessCardData } from "./BusinessCard.astro";
-import type { CTACardData } from "./CTACard.astro";
-
-// Union type for different card types
-type StackCardData =
-  | { type: "business"; data: BusinessCardData }
-  | { type: "cta"; data: CTACardData };
-
-// Sample data - mix of business cards and CTAs
-const sampleCards: StackCardData[] = [
-  {
-    type: "business",
-    data: {
-      name: "Your Name",
-      jobTitle: "Senior Full Stack Developer",
-      company: "TechCorp Inc",
-      logo: "/logos/techcorp.svg",
-      start: "2022",
-      end: "Present",
-      location: "San Francisco, CA",
-      description:
-        "Led development of microservices architecture using Go and TypeScript. Reduced deployment time by 60% through CI/CD improvements.",
-      layout: "logo-top-right",
-      rounded: true,
-    },
-  },
-  {
-    type: "cta",
-    data: {
-      title: "Let's Work Together",
-      description:
-        "Interested in collaborating on your next project? I'd love to hear about what you're building.",
-      buttonText: "Get In Touch",
-      buttonUrl: "mailto:hello@yourname.com",
-      rounded: true,
-    },
-  },
-  {
-    type: "business",
-    data: {
-      name: "Your Name",
-      jobTitle: "Software Engineer",
-      company: "StartupXYZ",
-      start: "2020",
-      end: "2022",
-      location: "Austin, TX",
-      description:
-        "Built customer-facing Ruby on Rails applications. Implemented real-time features using WebSockets and Redis.",
-      layout: "logo-top-right",
-      rounded: false,
-    },
-  },
-  {
-    type: "cta",
-    data: {
-      title: "View My Portfolio",
-      description:
-        "Check out some of the projects I've worked on and the technologies I love using.",
-      buttonText: "See Projects",
-      buttonUrl: "/portfolio",
-      rounded: false,
-    },
-  },
-  {
-    type: "business",
-    data: {
-      name: "Your Name",
-      jobTitle: "Junior Developer",
-      company: "Digital Agency Pro",
-      logo: "/logos/agency.svg",
-      start: "2018",
-      end: "2020",
-      location: "Remote",
-      description:
-        "Developed WordPress sites and custom JavaScript solutions. Collaborated with design teams on pixel-perfect implementations.",
-      layout: "logo-top-right",
-      rounded: true,
-    },
-  },
-];
+import type { StackCardData } from "./types";
 
 interface Props {
   cards?: StackCardData[];
 }
 
-const { cards = sampleCards } = Astro.props;
+const { cards = [] } = Astro.props;
 
 // Generate fixed positions for each card
 const cardPositions = cards.map((_, index) => ({

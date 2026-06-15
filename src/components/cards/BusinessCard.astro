@@ -1,18 +1,7 @@
 ---
 import BaseCard from "./BaseCard.astro";
-export interface BusinessCardData {
-  name?: string;
-  jobTitle: string;
-  company: string;
-  logo?: string;
-  duration: string;
-  location: string;
-  description: string;
-
-  // design props
-  layout?: "logo-top-right" | "logo-top-left" | "all-centered"; // easily extensible
-  rounded?: boolean;
-}
+import type { BusinessCardData } from "./types";
+import Socials from "./Socials.astro";
 
 interface Props {
   data: BusinessCardData;
@@ -22,50 +11,79 @@ const { data } = Astro.props;
 const {
   name = "Tom Sharkey",
   jobTitle,
-  company = "unknown",
+  company,
+  contact,
   logo = company,
   duration,
   location,
   description,
-  // todo add other layout types
   layout = "logo-top-right",
-  rounded = true,
 } = data;
 ---
 
-<BaseCard data={{ rounded: rounded }}>
-  <div class="grid">
-    {
-      layout === "logo-top-left" && (
-        <div class="grid-cols-2 grid-rows-4 ">
-          <div class="">
+{
+  layout === "leading" && (
+    <BaseCard>
+      <div class="grid">
+        <div class="grid-cols-2 grid-rows-4">
+          <div>
             <h2 class="text-xl">{name}</h2>
+            <p class="underline text-sm">{jobTitle}</p>
+            <p class="text-sm">{location}</p>
+            <p class="text-sm">{contact}</p>
+            <p class="italic text-sm">{description}</p>
+          </div>
+          <div class="row-start-4 flex justify-center items-end pt-4">
+            <Socials
+              github="https://github.com/tsharkey"
+              linkedin="https://www.linkedin.com/in/tmsharkey/"
+              rss="coming soon"
+              instagram="https://www.instagram.com/sharkey_tom/"
+            />
           </div>
         </div>
-      )
-    }
+      </div>
+    </BaseCard>
+  )
+}
 
-    {
-      layout === "logo-top-right" && (
-        <>
-          <div class={`col-start-1 row-start-1 ${!logo ? "col-span-2" : ""}`}>
-            <h2 class="text-xl font-bold text-gray-900 leading-tight">
-              {name}
-            </h2>
-            <p class="text-sm font-medium text-gray-600 mt-1">{jobTitle}</p>
-          </div>
+{
+  layout === "logo-top-right" && (
+    <BaseCard data={{ rounded: true }}>
+      <div
+        class="grid grid-cols-3 grid-rows-3 gap-2 h-full"
+        style="grid-template-rows: auto auto 1fr;"
+      >
+        {/* Name and job title - spans 2 columns */}
+        <div class="col-span-2 row-start-1">
+          <h2 class="text-xl font-bold text-gray-900 leading-tight">{name}</h2>
+          <p class="text-sm font-medium text-gray-600 mt-1">{jobTitle}</p>
+          <p class="text-sm font-medium text-gray-600 mt-1">{company}</p>
+        </div>
 
-          <div class="col-span-2 row-start-2 flex flex-col justify-center">
-            <p class="text-base font-semibold text-gray-800">{company}</p>
-            <p class="text-sm text-gray-600">{duration}</p>
-            <p class="text-sm text-gray-600">{location}</p>
+        {/* Logo in top right - updated for better fitting */}
+        <div class="col-start-3 row-start-1 flex justify-end items-start">
+          <div class="w-16 h-12 flex items-center justify-center">
+            <img
+              src={logo}
+              alt="Logo"
+              class="max-w-full max-h-full object-contain"
+            />
           </div>
+        </div>
 
-          <div class="col-span-2 row-start-3">
-            <p class="text-xs text-gray-700 leading-relaxed">{description}</p>
-          </div>
-        </>
-      )
-    }
-  </div>
-</BaseCard>
+        {/* Company info */}
+        <div class="col-span-3 row-start-2 flex flex-col justify-center">
+          <p class="text-base font-semibold text-gray-800">{contact}</p>
+          <p class="text-sm text-gray-600">{duration}</p>
+          <p class="text-sm text-gray-600">{location}</p>
+        </div>
+
+        {/* Description */}
+        <div class="col-span-3 row-start-3 flex items-start">
+          <p class="text-xs text-gray-700">{description}</p>
+        </div>
+      </div>
+    </BaseCard>
+  )
+}

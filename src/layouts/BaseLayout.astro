@@ -21,16 +21,16 @@ const { title, fixed = false } = Astro.props;
     class={`${fixed ? "h-screen overflow-hidden" : "min-h-screen"} bg-base-200`}
   >
     <IslandNav />
-    {fixed ? (
-      <!-- Full viewport layout for fixed pages -->
-      <main class="fixed inset-0 flex items-center justify-center">
-        <slot />
-      </main>
-    ) : (
-      <!-- Normal layout with navbar spacing -->
-      <main class="pt-24">
-        <slot />
-      </main>
-    )}
+    {
+      fixed ? (
+        <main class="fixed inset-0 flex items-center justify-center">
+          <slot />
+        </main>
+      ) : (
+        <main class="pt-24">
+          <slot />
+        </main>
+      )
+    }
   </body>
 </html>

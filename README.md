@@ -1,48 +1,95 @@
-# Astro Starter Kit: Basics
+# toosharks
 
-```sh
-npm create astro@latest -- --template basics
+A modern personal portfolio website for Tom Sharkey, Engineering Leader based in Waterford, CT.
+
+Built with [Astro](https://astro.build/) and deployed on [Fly.io](https://fly.io/).
+
+## 🚀 Features
+
+- **Interactive Card Stack**: Smooth animations showcasing professional experience
+- **Blog System**: Type-safe blog posts using Astro's content collections
+- **Responsive Design**: Mobile-first approach with custom Nord theme
+- **Performance Optimized**: Static site generation with minimal JavaScript
+
+## 🛠️ Tech Stack
+
+- **Framework**: Astro 5.8.1 with Islands Architecture
+- **Styling**: TailwindCSS 4.1.8 + DaisyUI 5.0.43
+- **TypeScript**: Strict type checking throughout
+- **Deployment**: Docker + Fly.io with automated CI/CD
+- **Development**: ESLint + Prettier + Mise for tooling
+
+## 📝 Development
+
+### Prerequisites
+
+- Node.js 22.16.0
+- npm
+- [mise](https://mise.jdx.dev/) (recommended for tool management)
+
+### Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Or with mise
+mise run dev
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+Open [http://localhost:4321](http://localhost:4321) in your browser.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### Available Commands
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+| Command | Action |
+| :-- | :-- |
+| `npm install` | Install dependencies |
+| `npm run dev` | Start local dev server at `localhost:4321` |
+| `npm run dev-local` | Start dev server bound to localhost only |
+| `npm run build` | Build production site to `./dist/` |
+| `npm run preview` | Preview build locally before deploying |
 
-## 🚀 Project Structure
+### Project Structure
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
+```
 /
 ├── public/
 │   └── favicon.svg
 ├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+│   ├── components/          # Reusable UI components
+│   │   ├── cards/          # Card system (BusinessCard, CTACard, Stack)
+│   │   └── nav/            # Navigation components
+│   ├── content/
+│   │   ├── blog/           # Blog posts (Markdown)
+│   │   └── config.ts       # Content collection schemas
+│   ├── layouts/            # Page layouts
+│   ├── pages/              # File-based routing
+│   └── styles/
+│       └── global.css      # Global styles with custom Nord theme
+├── astro.config.mjs        # Astro configuration
+├── Dockerfile              # Production container
+├── fly.toml                # Fly.io deployment config
+└── mise.toml               # Development tools & tasks
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## 🚢 Deployment
 
-## 🧞 Commands
+The site is automatically deployed to Fly.io when changes are pushed to the `main` branch.
 
-All commands are run from the root of the project, from a terminal:
+### Manual Deployment
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+```bash
+# Build and deploy
+mise run build-deploy
 
-## 👀 Want to learn more?
+# Or step by step
+npm run build
+fly deploy
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 📄 License
+
+Personal project - all rights reserved.
